@@ -1,0 +1,30 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h1>Login pagina</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-2">
+        <a class="btn btn-primary" asp-action="LoginWithUserName">Login with username</a>
+    </div>
+    <div class="col-md-2">
+        <a class="btn btn-secondary" asp-action="LoginWithEmail">Login with email address</a>
+    </div>
+    <div class="col-md-2">
+        <a class="btn btn-dark" asp-action="LoginWithIdentityServer">Login with IdentityServer</a>
+    </div>
+    <div class="col-md-2">
+        <a class="btn btn-info" asp-action="LoginWithFacebook">Login with Facebook</a>
+    </div>
+    <div class="col-md-2">
+        <a class="btn btn-danger" asp-action="LoginWithGoogle">Login with Google</a>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
