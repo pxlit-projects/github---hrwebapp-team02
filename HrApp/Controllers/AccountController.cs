@@ -11,6 +11,7 @@ namespace HrApp.Controllers
     {
         public IActionResult Login()
         {
+            var login = "test";
             return View();
         }
         #region Register
