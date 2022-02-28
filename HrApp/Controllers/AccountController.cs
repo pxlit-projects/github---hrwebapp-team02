@@ -1,22 +1,18 @@
 ﻿using HrApp.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using HrApp.Services;
 
 namespace HrApp.Controllers
 {
     public class AccountController : Controller
     {
-        UserManager<IdentityUser> _userManager;
-        SignInManager<IdentityUser> _signInManager;
-
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        IdentityRepositoryInterface _repo;
+        public AccountController(IdentityRepositoryInterface repo)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+
+            _repo = repo;
         }
 
         [HttpGet]
@@ -31,21 +27,19 @@ namespace HrApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var identityuser = await _userManager.FindByNameAsync(user.UserName);
-                if (identityuser != null)
+                var identityuser = await _repo.LoginAsync(user.UserName, null, user.Password);
+                if (identityuser.Succeeded)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(identityuser, user.Password, false, false);
-                    if (result.Succeeded)
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    foreach (var error in identityuser.Errors)
                     {
-                        return RedirectToAction("Index", "Home");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Invalid login attempt.");
+                        ModelState.AddModelError("",error);
                     }
                 }
             }
-
             return View(user);
         }
 
@@ -61,17 +55,16 @@ namespace HrApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var identityuser = await _userManager.FindByEmailAsync(user.Email);
-                if (identityuser != null)
+                var identityuser = await _repo.LoginAsync(null, user.Email, user.Password);
+                if (identityuser.Succeeded)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(identityuser, user.Password, false, false);
-                    if (result.Succeeded)
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    foreach (var error in identityuser.Errors)
                     {
-                        return RedirectToAction("Index", "Home");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Invalid login attempt.");
+                        ModelState.AddModelError("", error);
                     }
                 }
             }
@@ -97,24 +90,27 @@ namespace HrApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var registerresult = await _repo.RegisterAsync(registerData);
 
-                var identityUser = new IdentityUser() { UserName = registerData.UserName, Email = registerData.Email};
-                var result = await _userManager.CreateAsync(identityUser, registerData.Password);
-                if (result.Succeeded)
+                if (registerresult.Succeeded)
                 {
                     return View("Login");
                 }
                 else
                 {
-                    
+                    foreach (var error in registerresult.Errors)
+                    {
+                        ModelState.AddModelError("", error);
+                    }
                 }
             }
-            return View();
+            return View(registerData);
         }
         #endregion
         public IActionResult Logout()
         {
-            return View();
+            _repo.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
         public IActionResult AccessDenied()
         {

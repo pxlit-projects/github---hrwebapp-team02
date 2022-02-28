@@ -1,4 +1,5 @@
 using HrApp.Data;
+using HrApp.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,6 +33,8 @@ namespace HrApp
             });
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
+
+            services.AddScoped<IdentityRepositoryInterface,IdentityRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
